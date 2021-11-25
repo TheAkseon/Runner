@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    private Vector3 _offset = new Vector3(0, 3, -4);
+    private Vector3 _offset = new Vector3(0, 4, -6);
     [SerializeField] private Transform _player;
 
     private void LateUpdate()

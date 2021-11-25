@@ -2,68 +2,53 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
 {
-    private CharacterController _controller;
-    private Vector3 _direction;
+    [SerializeField] private float _sensivity;
     [SerializeField] private float _speed;
-    [SerializeField] private float _jumpForce;
-    [SerializeField] private float _gravity;
-    private int lineToMove = 1;
-    private float lineDistance = 6;
+    private int _xRange = 6;
+    private Rigidbody _rigidbody;
 
     private void Start()
     {
-        _controller = GetComponent<CharacterController>();
+        _rigidbody = GetComponent<Rigidbody>();
     }
 
     private void Update()
     {
-        if (SwipeContreller.swipeRight)
+        Move(Vector3.forward);
+        Limit();
+        if (Input.touchCount > 0)
         {
-            if (lineToMove < 2)
-            {
-                lineToMove++;
-            }
+            MoveHorizontal();
         }
-        
-        if (SwipeContreller.swipeLeft)
-        {
-            if (lineToMove > 0)
-            {
-                lineToMove--;
-            }
-        }
-
-        if (SwipeContreller.swipeUp)
-        {
-            if (_controller.isGrounded)
-            {
-                Jump();
-            }
-        }
-
-        Vector3 targetPosition = transform.position.z * transform.forward + transform.position.y * transform.up;
-        if (lineToMove == 0)
-        {
-            targetPosition += Vector3.left * lineDistance;
-        }
-        else if (lineToMove == 2)
-        {
-            targetPosition += Vector3.right * lineDistance;
-        }
-        transform.position = targetPosition;
     }
 
-    private void Jump()
+    private void Move(Vector3 direction)
     {
-        _direction.y = _jumpForce;
+        transform.Translate(direction * _speed * Time.deltaTime);
     }
 
-    private void FixedUpdate()
+    private void Limit()
     {
-        _direction.z = _speed;
-        _direction.y += _gravity * Time.fixedDeltaTime;
-        _controller.Move(_direction * Time.fixedDeltaTime);
+        if (transform.position.x < -_xRange)
+        {
+            transform.position = new Vector3(-_xRange, transform.position.y, transform.position.z);
+        }
+        if (transform.position.x > _xRange)
+        {
+            transform.position = new Vector3(_xRange, transform.position.y, transform.position.z);
+        }
+    }
+
+    private void MoveHorizontal()
+    {
+        Touch touch = Input.GetTouch(0);
+        if (touch.phase == TouchPhase.Moved)
+        {
+            float move = touch.deltaPosition.x * Time.deltaTime * _sensivity;
+            _rigidbody.AddForce(Vector3.right * move);
+        }
     }
 }
